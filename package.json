@@ -1,0 +1,28 @@
+{
+  "name": "vite-template-solid",
+  "version": "0.0.0",
+  "description": "",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^8.42.0",
+    "eslint-plugin-solid": "^0.12.1",
+    "vite": "^4.1.1",
+    "vite-plugin-solid": "^2.5.0"
+  },
+  "dependencies": {
+    "@solidjs/router": "^0.8.2",
+    "@suid/icons-material": "^0.6.3",
+    "@suid/material": "^0.12.3",
+    "@suid/vite-plugin": "^0.1.4",
+    "hls.js": "^1.4.5",
+    "solid-bootstrap": "^1.0.13",
+    "solid-js": "^1.6.10",
+    "vite-plugin-eslint": "^1.8.1"
+  }
+}
