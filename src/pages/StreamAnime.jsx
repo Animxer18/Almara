@@ -8,12 +8,16 @@ import { pascalCase } from "../helpers";
 import WrapperFetch from "../components/general/WrapperFetch";
 import SelectQuality from "../components/StreamAnime.jsx/SelectQuality";
 import ButtonRefresh from "../components/general/ButtonCustom.jsx/ButtonRefresh";
+import { useBreakpoint } from "../hooks";
 
 const StreamAnime = () => {
   const params = useParams();
   const [isPlay, setIsPlay] = createSignal(false);
   const [quality, setQuality] = createSignal();
   const navigate = useNavigate();
+  let video;
+
+  const { xs } = useBreakpoint();
 
   const fetchStreamData = async () =>
     await (
@@ -22,7 +26,6 @@ const StreamAnime = () => {
       )
     ).json();
   const [dataStream, { refetch, mutate }] = createResource(fetchStreamData);
-  let video;
 
   const isPlayVideo = () => {
     if (isPlay()) {
@@ -38,7 +41,6 @@ const StreamAnime = () => {
     on(
       () => [dataStream(), quality()],
       () => {
-        console.log("ara : ", quality());
         const qualityValue = () =>
           quality() ?? dataStream()?.sources?.[0]?.quality;
 
@@ -63,7 +65,11 @@ const StreamAnime = () => {
   return (
     <Container sx={{ marginTop: "20px" }}>
       <Row
-        style={{ "justify-content": "space-around", "text-align": "center" }}
+        style={{
+          "justify-content": "space-around",
+          "text-align": "center",
+          "align-items": "center",
+        }}
       >
         <Col>
           <ButtonBack onClick={() => navigate(-1)}>Back</ButtonBack>
@@ -80,7 +86,7 @@ const StreamAnime = () => {
       <WrapperFetch datas={dataStream()} onClick={refetch}>
         <Row style={{ margin: "10px 0" }}>
           <Col>
-            <Typography variant="h5">
+            <Typography variant={xs() ? "h6" : "h5"}>
               {pascalCase(params?.id?.replaceAll("-", " "))}
             </Typography>
           </Col>
@@ -95,8 +101,8 @@ const StreamAnime = () => {
             >
               <video
                 id="video"
-                width={640}
-                height={360}
+                width={xs() ? 320 : 640}
+                height={xs() ? 240 : 360}
                 ref={video}
                 controls
                 style={{ cursor: "pointer" }}

@@ -6,7 +6,7 @@ import ButtonBack from "../components/general/ButtonCustom.jsx/ButtonBack";
 const SearchAnime = () => {
   const params = useParams();
   return (
-    <Container>
+    <>
       <Typography variant="h6" sx={{ textAlign: "center" }}>
         Search : {decodeURIComponent(params?.search)}
       </Typography>
@@ -16,7 +16,7 @@ const SearchAnime = () => {
         deps={[params?.search]}
       />
       <ButtonBack>Back to Home</ButtonBack>
-    </Container>
+    </>
   );
 };
 

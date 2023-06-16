@@ -11,6 +11,7 @@ import {
 import { For, mergeProps } from "solid-js";
 import { createSignal, splitProps } from "solid-js";
 import { pascalCase } from "../../helpers";
+import { useBreakpoint } from "../../hooks";
 import WrapperFetch from "../general/WrapperFetch";
 
 export default function BasicModal(props) {
@@ -19,6 +20,9 @@ export default function BasicModal(props) {
     { btnText: "Select Quality", qualityDatas: [] },
     props
   );
+
+  const { xs } = useBreakpoint();
+
   const [local] = splitProps(defaultProps, [
     "btnText",
     "title",
@@ -44,9 +48,9 @@ export default function BasicModal(props) {
             position: "absolute",
             top: "50%",
             left: "50%",
-            transform: "translate(-50%, -50%)",
+            transform: `translate(-50%,-50%)`,
             backgroundColor: "white",
-            width: 500,
+            width: xs() ? 350 : 500,
             boxShadow: "24px",
             p: 4,
           }}

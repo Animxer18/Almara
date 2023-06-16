@@ -1,5 +1,5 @@
-import { useNavigate } from "@solidjs/router";
-import { Container, Button, Stack, Grid } from "@suid/material";
+import { useLocation, useNavigate } from "@solidjs/router";
+import { Button, Grid } from "@suid/material";
 import {
   createEffect,
   createResource,
@@ -7,49 +7,59 @@ import {
   For,
   mergeProps,
   on,
+  onMount,
   Show,
   splitProps,
 } from "solid-js";
 import CardAnime from "./CardAnime";
-import LoadingComponent from "./LoadingComponent";
 import { idToTitle } from "../../helpers";
-import { Match, Switch } from "solid-js/web";
 import WrapperFetch from "./WrapperFetch";
+import { useBreakpoint } from "../../hooks";
 
 const PrevNextBtn = (props) => {
   const [local] = splitProps(props, ["data", "currPage", "setCurrPage"]);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { xs } = useBreakpoint();
 
   return (
-    <Show when={local?.data?.hasNextPage} fallback={<></>}>
-      <Grid item width={"100%"} sx={{ margin: "50px 0" }}>
+    <Show
+      when={local?.data?.hasNextPage || Number(local?.data?.currentPage) !== 1}
+      fallback={<></>}
+    >
+      <Grid item width={"100%"} sx={{ margin: `${xs() ? "10px" : "50px"} 0` }}>
         <Grid
           sx={{ justifyContent: "center" }}
           container
           wrap="wrap"
           columnSpacing={2}
         >
-          <Show when={local?.currPage !== 1} fallback={<></>}>
+          <Show when={Number(local?.data?.currentPage) !== 1} fallback={<></>}>
             <Grid item>
               <Button
                 variant="outlined"
                 onClick={() => {
                   local?.setCurrPage(local?.currPage - 1);
+                  navigate(`${location?.pathname}?page=${local?.currPage}`);
                 }}
               >
                 Prev Page
               </Button>
             </Grid>
           </Show>
-          <Grid item>
-            <Button
-              variant="contained"
-              onClick={() => {
-                local?.setCurrPage(local?.currPage + 1);
-              }}
-            >
-              Next Page
-            </Button>
-          </Grid>
+          <Show when={local?.data?.hasNextPage}>
+            <Grid item>
+              <Button
+                variant="contained"
+                onClick={() => {
+                  local?.setCurrPage(local?.currPage + 1);
+                  navigate(`${location?.pathname}?page=${local?.currPage}`);
+                }}
+              >
+                Next Page
+              </Button>
+            </Grid>
+          </Show>
         </Grid>
       </Grid>
     </Show>
@@ -58,6 +68,7 @@ const PrevNextBtn = (props) => {
 
 const ListAnime = (props) => {
   const mergedProps = mergeProps({ deps: [] }, props);
+  const location = useLocation();
   const [local] = splitProps(mergedProps, ["url", "deps"]);
 
   const [currPage, setCurrPage] = createSignal(1);
@@ -79,6 +90,19 @@ const ListAnime = (props) => {
     )
   );
 
+  createEffect(
+    on(
+      () => [location.search],
+      () => {
+        setCurrPage(Number(location.search.split("=")?.[1]));
+      }
+    )
+  );
+
+  onMount(() => {
+    setCurrPage(Number(location?.search?.split("=")?.[1]) || 1);
+  });
+
   return (
     <WrapperFetch datas={data()} onClick={refetch}>
       <Grid container spacing={5}>
@@ -91,7 +115,7 @@ const ListAnime = (props) => {
           <Grid
             container
             sx={{ justifyContent: "center" }}
-            spacing={4}
+            spacing={3}
             columns={4}
             wrap="wrap"
           >
@@ -116,6 +140,7 @@ const ListAnime = (props) => {
           data={data()}
           currPage={currPage()}
           setCurrPage={setCurrPage}
+          navigate={navigate}
         />
       </Grid>
     </WrapperFetch>

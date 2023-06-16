@@ -10,9 +10,9 @@ const SearchAnimeComp = () => {
     <div style={{ margin: "20px 0" }}>
       <TextField
         onKeyPress={(e) => {
-          if (e?.code === "Enter") {
+          if (e?.code === "Enter" || e?.key === "Enter") {
             if (searchAnime()?.trim() !== "") {
-              navigate(`/search/${searchAnime()?.trim()}`);
+              navigate(`/search/${searchAnime()?.trim()}?page=1`);
             } else {
               navigate(`/`);
             }
