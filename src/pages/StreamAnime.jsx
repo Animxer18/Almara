@@ -2,13 +2,14 @@ import { useNavigate, useParams } from "@solidjs/router";
 import Hls from "hls.js";
 import { Col, Row } from "solid-bootstrap";
 import { Container, Typography } from "@suid/material";
-import { createEffect, createResource, createSignal, on } from "solid-js";
+import { createEffect, createResource, createSignal, on, Show } from "solid-js";
 import ButtonBack from "../components/general/ButtonCustom.jsx/ButtonBack";
 import { pascalCase } from "../helpers";
 import WrapperFetch from "../components/general/WrapperFetch";
 import SelectQuality from "../components/StreamAnime.jsx/SelectQuality";
 import ButtonRefresh from "../components/general/ButtonCustom.jsx/ButtonRefresh";
 import { useBreakpoint } from "../hooks";
+import BottomBarMobile from "../components/general/BottomBarMobile";
 
 const StreamAnime = () => {
   const params = useParams();
@@ -29,7 +30,7 @@ const StreamAnime = () => {
 
   const isPlayVideo = () => {
     if (isPlay()) {
-      video?.paused();
+      video?.pause();
       setIsPlay(false);
     } else {
       video?.play();
@@ -71,9 +72,11 @@ const StreamAnime = () => {
           "align-items": "center",
         }}
       >
-        <Col>
-          <ButtonBack onClick={() => navigate(-1)}>Back</ButtonBack>
-        </Col>
+        <Show when={!xs()} fallback={<></>}>
+          <Col>
+            <ButtonBack onClick={() => navigate(-1)}>Back</ButtonBack>
+          </Col>
+        </Show>
         <Col>
           <ButtonRefresh
             onClick={() => {
@@ -132,6 +135,14 @@ const StreamAnime = () => {
             />
           </Col>
         </Row>
+        <BottomBarMobile
+          onClickRefresh={() => {
+            mutate();
+            refetch();
+          }}
+          onClickPrev={() => navigate(-1)}
+          showPrev
+        />
       </WrapperFetch>
     </Container>
   );

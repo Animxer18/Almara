@@ -21,7 +21,7 @@ const CardAnime = (props) => {
       <CardContent>
         <PopoverCustom title={mergedProps?.title}>
           <Typography align="center" variant={xs() ? "body" : "h6"}>
-            {`${mergedProps?.title?.substring(0, 24)}...`}
+            {`${mergedProps?.title?.substring(0, `${xs() ? 14 : 24}`)}...`}
           </Typography>
         </PopoverCustom>
       </CardContent>

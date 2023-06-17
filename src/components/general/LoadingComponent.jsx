@@ -1,12 +1,13 @@
-import { Typography, Container } from "@suid/material";
-
+import { Typography, Container, Button } from "@suid/material";
 import { Col, Image, Row } from "solid-bootstrap";
 import Stack from "@suid/material/Stack";
 import kuru from "../../assets/kuru.gif";
+import bocchiError from "../../assets/bocchiError.gif";
 import ButtonBack from "./ButtonCustom.jsx/ButtonBack";
 import { useLocation, useNavigate } from "@solidjs/router";
-import { For, mergeProps, Show, splitProps } from "solid-js";
+import { For, mergeProps, Show, splitProps, Switch } from "solid-js";
 import { useBreakpoint } from "../../hooks";
+import BottomBarMobile from "./BottomBarMobile";
 
 const LoadingComponent = (props) => {
   const navigate = useNavigate();
@@ -14,13 +15,16 @@ const LoadingComponent = (props) => {
   const { xs } = useBreakpoint();
 
   const mergedProps = mergeProps({ extraButton: [] }, props);
-  const [local] = splitProps(mergedProps, ["extraButton"]);
+  const [local] = splitProps(mergedProps, ["extraButton", "childrenError"]);
 
   return (
     <Container>
       <Row style={{ "text-align": "center" }}>
         <Show
-          when={location?.pathname !== "/" || location?.search !== "?page=1"}
+          when={
+            !xs() &&
+            (location?.pathname !== "/" || location?.search !== "?page=1")
+          }
           fallback={<></>}
         >
           <Col>
@@ -60,6 +64,7 @@ const LoadingComponent = (props) => {
           </Stack>
         </Col>
       </Row>
+      <BottomBarMobile />
     </Container>
   );
 };

@@ -15,6 +15,7 @@ import CardAnime from "./CardAnime";
 import { idToTitle } from "../../helpers";
 import WrapperFetch from "./WrapperFetch";
 import { useBreakpoint } from "../../hooks";
+import BottomBarMobile from "./BottomBarMobile";
 
 const PrevNextBtn = (props) => {
   const [local] = splitProps(props, ["data", "currPage", "setCurrPage"]);
@@ -67,6 +68,8 @@ const PrevNextBtn = (props) => {
 };
 
 const ListAnime = (props) => {
+  const { xs } = useBreakpoint();
+
   const mergedProps = mergeProps({ deps: [] }, props);
   const location = useLocation();
   const [local] = splitProps(mergedProps, ["url", "deps"]);
@@ -105,12 +108,14 @@ const ListAnime = (props) => {
 
   return (
     <WrapperFetch datas={data()} onClick={refetch}>
-      <Grid container spacing={5}>
-        <PrevNextBtn
-          data={data()}
-          currPage={currPage()}
-          setCurrPage={setCurrPage}
-        />
+      <Grid container spacing={5} sx={{ marginBottom: 15 }}>
+        <Show when={!xs()} fallback={<></>}>
+          <PrevNextBtn
+            data={data()}
+            currPage={currPage()}
+            setCurrPage={setCurrPage}
+          />
+        </Show>
         <Grid item>
           <Grid
             container
@@ -136,12 +141,34 @@ const ListAnime = (props) => {
             </For>
           </Grid>
         </Grid>
-        <PrevNextBtn
-          data={data()}
-          currPage={currPage()}
-          setCurrPage={setCurrPage}
-          navigate={navigate}
-        />
+        <Show when={!xs()} fallback={<></>}>
+          <PrevNextBtn
+            data={data()}
+            currPage={currPage()}
+            setCurrPage={setCurrPage}
+          />
+        </Show>
+        <Show when={xs()} fallback={<></>}>
+          <BottomBarMobile
+            data={data()}
+            currPage={currPage()}
+            setCurrPage={setCurrPage}
+            onClickRefresh={() => {
+              mutate();
+              refetch();
+            }}
+            onClickPrev={() => {
+              setCurrPage(currPage() - 1);
+              navigate(`${location?.pathname}?page=${currPage()}`);
+            }}
+            onClickNext={() => {
+              setCurrPage(currPage() + 1);
+              navigate(`${location?.pathname}?page=${currPage()}`);
+            }}
+            showNext
+            showPrev
+          />
+        </Show>
       </Grid>
     </WrapperFetch>
   );

@@ -1,8 +1,10 @@
 import { useNavigate, useParams } from "@solidjs/router";
-import { Chip, Grid, Typography } from "@suid/material";
+import { Chip, Grid, IconButton, Typography } from "@suid/material";
 import { Col, Image, Row } from "solid-bootstrap";
-import { createResource, For } from "solid-js";
+import { createResource, createSignal, For, Show } from "solid-js";
 import AnimeDetailAnimeInfo from "../components/AnimeDetail/AnimeDetailAnimeInfo";
+import PreviewImage from "../components/AnimeDetail/PreviewImage";
+import BottomBarMobile from "../components/general/BottomBarMobile";
 import ButtonBack from "../components/general/ButtonCustom.jsx/ButtonBack";
 import WrapperFetch from "../components/general/WrapperFetch";
 import { useBreakpoint } from "../hooks";
@@ -11,6 +13,7 @@ const AnimeDetail = () => {
   const params = useParams();
   const navigate = useNavigate();
   const { xs } = useBreakpoint();
+  const [isOpenPreview, setIsOpenPreview] = createSignal(false);
 
   const fetchDetailData = async () => {
     return await (
@@ -21,11 +24,13 @@ const AnimeDetail = () => {
 
   return (
     <WrapperFetch datas={dataDetail()} onClick={refetch}>
-      <Row style={{ margin: "10px 0" }}>
-        <Col lg={12}>
-          <ButtonBack onClick={() => navigate(-1)}>Back</ButtonBack>
-        </Col>
-      </Row>
+      <Show when={!xs()} fallback={<></>}>
+        <Row style={{ margin: "10px 0" }}>
+          <Col lg={12}>
+            <ButtonBack onClick={() => navigate(-1)}>Back</ButtonBack>
+          </Col>
+        </Row>
+      </Show>
       <Row style={{ "align-items": "center" }}>
         <Col
           lg={3}
@@ -35,7 +40,17 @@ const AnimeDetail = () => {
             },
           })}
         >
-          <Image src={dataDetail()?.image} width={210} />
+          <PreviewImage
+            setIsOpenPreview={setIsOpenPreview}
+            isOpenPreview={isOpenPreview()}
+            onClick={() => setIsOpenPreview(true)}
+          >
+            <Image
+              src={dataDetail()?.image}
+              width={210}
+              style={{ cursor: "pointer" }}
+            />
+          </PreviewImage>
         </Col>
         <Col lg={9}>
           <Row>
@@ -67,7 +82,13 @@ const AnimeDetail = () => {
           </Typography>
         </Col>
       </Row>
-      <Row style={{ margin: "auto" }}>
+      <Row
+        {...(xs() && {
+          style: {
+            "margin-bottom": "100px",
+          },
+        })}
+      >
         <Col style={{ width: "100%" }}>
           <Grid
             sx={{ textAlign: "center" }}
@@ -104,11 +125,21 @@ const AnimeDetail = () => {
           </Grid>
         </Col>
       </Row>
-      <Row style={{ "text-align": "center", margin: "10px 0" }}>
-        <Col lg={12}>
-          <ButtonBack onClick={() => navigate(-1)}>Back</ButtonBack>
-        </Col>
-      </Row>
+      <Show when={!xs()} fallback={<></>}>
+        <Row style={{ "text-align": "center", margin: "10px 0" }}>
+          <Col lg={12}>
+            <ButtonBack onClick={() => navigate(-1)}>Back</ButtonBack>
+          </Col>
+        </Row>
+      </Show>
+      <BottomBarMobile
+        onClickRefresh={() => {
+          mutate();
+          refetch();
+        }}
+        onClickPrev={() => navigate(-1)}
+        showPrev
+      />
     </WrapperFetch>
   );
 };
