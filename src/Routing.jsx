@@ -1,5 +1,5 @@
-import { Routes, Route } from "@solidjs/router";
-import { lazy } from "solid-js";
+import { Routes, Route, useNavigate, useLocation } from "@solidjs/router";
+import { createEffect, lazy, on } from "solid-js";
 import SuspenseElement from "./components/general/SuspenseElement";
 
 const Home = lazy(() => import("./pages/Home"));
@@ -9,6 +9,19 @@ const SearchAnime = lazy(() => import("./pages/SearchAnime"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const Routing = () => {
+  // const navigate = useNavigate();
+  // const location = useLocation();
+
+  // createEffect(
+  //   on(
+  //     () => [location],
+  //     () => {
+  //       if (location?.pathname === "/") {
+  //         navigate("/?page=1");
+  //       }
+  //     }
+  //   )
+  // );
   return (
     <Routes>
       <Route

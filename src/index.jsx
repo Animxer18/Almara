@@ -8,6 +8,7 @@ import { Button, Container, Stack, Typography } from "@suid/material";
 import BocchiError from "./assets/bocchiError.gif";
 import { Col, Image, Row } from "solid-bootstrap";
 import { useBreakpoint } from "./hooks";
+import "./index.css";
 
 const root = document.getElementById("root");
 
@@ -53,12 +54,12 @@ render(
         </Container>
       )}
     >
-      <Router>
-        <Container>
+      <Container>
+        <Router>
           <SearchAnimeComp />
-        </Container>
-        <Routing />
-      </Router>
+          <Routing />
+        </Router>
+      </Container>
     </ErrorBoundary>
   ),
   root

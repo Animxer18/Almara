@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "@solidjs/router";
-import { Chip, Grid, IconButton, Typography } from "@suid/material";
+import { Chip, Grid, Typography } from "@suid/material";
 import { Col, Image, Row } from "solid-bootstrap";
 import { createResource, createSignal, For, Show } from "solid-js";
 import AnimeDetailAnimeInfo from "../components/AnimeDetail/AnimeDetailAnimeInfo";
@@ -102,7 +102,17 @@ const AnimeDetail = () => {
                   <Grid item>
                     <Chip
                       clickable
-                      onClick={() => navigate(`/stream/${data?.id}`)}
+                      onClick={() =>
+                        navigate(`/stream/${data?.id}`, {
+                          state: {
+                            id: data?.id,
+                            idAnime: dataDetail()?.id,
+                            currentEpisode: data?.number,
+                            animeName: dataDetail()?.title,
+                            allEpisodes: dataDetail()?.episodes,
+                          },
+                        })
+                      }
                       sx={{
                         cursor: "pointer",
                         ...(xs() && { padding: "18px" }),
@@ -113,7 +123,6 @@ const AnimeDetail = () => {
                       size="20px"
                       label={
                         <Typography
-                          // variant={xs() ? "button" : "body"}
                           variant={xs() ? "button" : "body"}
                         >{`Episode ${data?.number}`}</Typography>
                       }
@@ -126,13 +135,14 @@ const AnimeDetail = () => {
         </Col>
       </Row>
       <Show when={!xs()} fallback={<></>}>
-        <Row style={{ "text-align": "center", margin: "10px 0" }}>
+        <Row style={{ margin: "10px 0" }}>
           <Col lg={12}>
             <ButtonBack onClick={() => navigate(-1)}>Back</ButtonBack>
           </Col>
         </Row>
       </Show>
       <BottomBarMobile
+        showRefresh
         onClickRefresh={() => {
           mutate();
           refetch();

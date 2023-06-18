@@ -23,3 +23,7 @@ export const pascalCase = (str) => {
 export const camelToUpperLowerCase = (str) => {
   return str.replace(/([A-Z])/g, " $1").trim();
 };
+
+export const uniqueObjArray = ({ arr, obj }) => [
+  ...new Map(arr.map((item) => [item[obj], item])).values(),
+];

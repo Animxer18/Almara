@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "@solidjs/router";
-import { Button, Grid } from "@suid/material";
+import { Button, Grid, Container, Box } from "@suid/material";
 import {
   createEffect,
   createResource,
@@ -12,10 +12,15 @@ import {
   splitProps,
 } from "solid-js";
 import CardAnime from "./CardAnime";
-import { idToTitle } from "../../helpers";
+import { idToTitle, uniqueObjArray } from "../../helpers";
 import WrapperFetch from "./WrapperFetch";
 import { useBreakpoint } from "../../hooks";
 import BottomBarMobile from "./BottomBarMobile";
+import GenreComponent from "../Genre/GenreComponent";
+import { Collapse } from "solid-collapse";
+import KeyboardArrowDownIcon from "@suid/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@suid/icons-material/KeyboardArrowUp";
+import NotFound from "../../pages/NotFound";
 
 const PrevNextBtn = (props) => {
   const [local] = splitProps(props, ["data", "currPage", "setCurrPage"]);
@@ -68,20 +73,75 @@ const PrevNextBtn = (props) => {
 };
 
 const ListAnime = (props) => {
+  const location = useLocation();
   const { xs } = useBreakpoint();
+  const navigate = useNavigate();
+
+  const [currPage, setCurrPage] = createSignal(
+    Number(location?.search?.split("=")?.[1]) || 1
+  );
+  const [arrGenres, setArrGenres] = createSignal([]);
+  const [arrSelectedGenres, setArrSelectedGenres] = createSignal([]);
+  const [dataFiltered, setDataFiltered] = createSignal([]);
+  // filtered by genre
+
+  const [isShowGenres, setIsShowGenres] = createSignal(false);
 
   const mergedProps = mergeProps({ deps: [] }, props);
-  const location = useLocation();
   const [local] = splitProps(mergedProps, ["url", "deps"]);
 
-  const [currPage, setCurrPage] = createSignal(1);
-
-  const navigate = useNavigate();
   const fetchDataHandler = async () => {
     return await (await fetch(`${local?.url}?page=${currPage()}`)).json();
   };
 
   const [data, { refetch, mutate }] = createResource(() => fetchDataHandler());
+
+  const arrDatas = () => {
+    if (arrSelectedGenres()?.length) {
+      return dataFiltered();
+    }
+    return data();
+  };
+
+  const getAllGenres = () => {
+    if (data()?.results?.length) {
+      const genres = data()?.results?.map((res) => res?.genres);
+
+      const allGenres = genres?.reduce((init, curr) => {
+        curr?.forEach((c) => {
+          init = [...new Set([...init, c])];
+        });
+        return init;
+      }, []);
+
+      setArrGenres(allGenres?.sort());
+    }
+  };
+
+  const filteredDataByGenre = () => {
+    const arrDataFiltered = [];
+
+    data()?.results?.forEach((data) => {
+      arrSelectedGenres()?.forEach((selectedGenre) => {
+        if (data?.genres?.includes(selectedGenre)) {
+          arrDataFiltered?.push(data);
+        }
+      });
+    });
+
+    const arrFilteredGenres = arrGenres().filter((genre) => {
+      if (!arrSelectedGenres()?.includes(genre)) {
+        return genre;
+      }
+    });
+
+    setArrGenres(arrFilteredGenres?.sort());
+
+    setDataFiltered({
+      ...data(),
+      results: uniqueObjArray({ arr: arrDataFiltered, obj: "id" }),
+    });
+  };
 
   createEffect(
     on(
@@ -89,29 +149,92 @@ const ListAnime = (props) => {
       () => {
         mutate();
         refetch();
+        setArrSelectedGenres([]);
       }
     )
   );
 
   createEffect(
     on(
-      () => [location.search],
+      () => [data()],
       () => {
-        setCurrPage(Number(location.search.split("=")?.[1]));
+        getAllGenres();
       }
     )
   );
 
-  onMount(() => {
-    setCurrPage(Number(location?.search?.split("=")?.[1]) || 1);
-  });
+  createEffect(
+    on(
+      () => [arrSelectedGenres()],
+      () => {
+        filteredDataByGenre();
+      }
+    )
+  );
+
+  createEffect(
+    on(
+      () => [location?.search],
+      () => {
+        if (location?.search === "?page=1") {
+          setCurrPage(1);
+        }
+      }
+    )
+  );
 
   return (
-    <WrapperFetch datas={data()} onClick={refetch}>
+    <WrapperFetch datas={arrDatas()} onClick={refetch}>
+      <Show when={!location?.pathname?.includes("search")} fallback={<></>}>
+        <Box
+          {...(xs() && {
+            sx: { marginBottom: "20px" },
+          })}
+        >
+          <Button
+            variant="outlined"
+            endIcon={
+              isShowGenres() ? (
+                <KeyboardArrowUpIcon />
+              ) : (
+                <KeyboardArrowDownIcon />
+              )
+            }
+            sx={{
+              width: "100%",
+              justifyContent: "space-between",
+            }}
+            onClick={() => {
+              setIsShowGenres(!isShowGenres());
+            }}
+          >
+            Show Genres
+          </Button>
+          <Collapse value={isShowGenres()} class="my-transition">
+            <GenreComponent
+              arrGenres={arrGenres()}
+              setArrGenres={setArrGenres}
+              arrSelectedGenres={arrSelectedGenres()}
+              setArrSelectedGenres={setArrSelectedGenres}
+            />
+          </Collapse>
+          <Show when={arrSelectedGenres()?.length} fallback={<></>}>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                setArrSelectedGenres([]);
+                getAllGenres();
+              }}
+            >
+              Clear Filter
+            </Button>
+          </Show>
+        </Box>
+      </Show>
       <Grid container spacing={5} sx={{ marginBottom: 15 }}>
         <Show when={!xs()} fallback={<></>}>
           <PrevNextBtn
-            data={data()}
+            data={arrDatas()}
             currPage={currPage()}
             setCurrPage={setCurrPage}
           />
@@ -124,7 +247,14 @@ const ListAnime = (props) => {
             columns={4}
             wrap="wrap"
           >
-            <For each={data()?.results} fallback={<>No Data</>}>
+            <For
+              each={arrDatas()?.results}
+              fallback={
+                <Container>
+                  <NotFound>No Data</NotFound>
+                </Container>
+              }
+            >
               {(data) => {
                 return (
                   <Grid item>
@@ -143,32 +273,35 @@ const ListAnime = (props) => {
         </Grid>
         <Show when={!xs()} fallback={<></>}>
           <PrevNextBtn
-            data={data()}
+            data={arrDatas()}
             currPage={currPage()}
             setCurrPage={setCurrPage}
           />
         </Show>
-        <Show when={xs()} fallback={<></>}>
-          <BottomBarMobile
-            data={data()}
-            currPage={currPage()}
-            setCurrPage={setCurrPage}
-            onClickRefresh={() => {
-              mutate();
-              refetch();
-            }}
-            onClickPrev={() => {
-              setCurrPage(currPage() - 1);
-              navigate(`${location?.pathname}?page=${currPage()}`);
-            }}
-            onClickNext={() => {
-              setCurrPage(currPage() + 1);
-              navigate(`${location?.pathname}?page=${currPage()}`);
-            }}
-            showNext
-            showPrev
-          />
-        </Show>
+        <BottomBarMobile
+          data={arrDatas()}
+          currPage={currPage()}
+          showRefresh
+          setCurrPage={setCurrPage}
+          onClickRefresh={() => {
+            mutate();
+            refetch();
+          }}
+          onClickHome={() => {
+            setCurrPage(1);
+            navigate(`${location?.pathname}?page=${currPage()}`);
+          }}
+          onClickPrev={() => {
+            setCurrPage(currPage() - 1);
+            navigate(`${location?.pathname}?page=${currPage()}`);
+          }}
+          onClickNext={() => {
+            setCurrPage(currPage() + 1);
+            navigate(`${location?.pathname}?page=${currPage()}`);
+          }}
+          showNext
+          showPrev
+        />
       </Grid>
     </WrapperFetch>
   );

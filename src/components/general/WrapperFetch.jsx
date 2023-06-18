@@ -6,7 +6,7 @@ const WrapperFetch = (props) => {
   const [local] = splitProps(props, ["children", "datas"]);
 
   return (
-    <Container style={{ "margin-top": "20px" }}>
+    <>
       <Switch fallback={<>No Data</>}>
         <Match when={local?.datas?.loading}>
           <LoadingComponent />
@@ -26,7 +26,7 @@ const WrapperFetch = (props) => {
           <p>{local?.datas?.error}</p>
         </Match>
       </Switch>
-    </Container>
+    </>
   );
 };
 
