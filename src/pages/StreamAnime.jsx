@@ -33,7 +33,7 @@ const StreamAnime = () => {
   const fetchStreamData = async () =>
     await (
       await fetch(
-        `https://api.consumet.org/anime/gogoanime/watch/${params?.id}`
+        `https://animexer1-api.vercel.app/anime/gogoanime/watch/${params?.id}`
       )
     ).json();
   const [dataStream, { refetch, mutate }] = createResource(fetchStreamData);
