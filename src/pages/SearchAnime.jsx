@@ -18,7 +18,7 @@ const SearchAnime = () => {
         <ButtonBack>Back to Home</ButtonBack>
       </Show>
       <ListAnime
-        url={`https://api.consumet.org/anime/gogoanime/${params?.search}`}
+        url={`https://animexer1-api.vercel.app/anime/gogoanime/${params?.search}`}
         deps={[params?.search]}
       />
       <Show when={!xs()} fallback={<></>}>
