@@ -17,7 +17,7 @@ const AnimeDetail = () => {
 
   const fetchDetailData = async () => {
     return await (
-      await fetch(`https://api.consumet.org/anime/gogoanime/info/${params?.id}`)
+      await fetch(`https://animexer1-api.vercel.app/anime/gogoanime/info/${params?.id}`)
     ).json();
   };
   const [dataDetail, { refetch, mutate }] = createResource(fetchDetailData);
